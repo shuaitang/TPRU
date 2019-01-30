@@ -14,15 +14,15 @@ class TPRU(nn.Module):
     self.bx = nn.Parameter(torch.ones(1).float())
     self.bg = nn.Parameter(torch.ones(1).float())     
 
-    self.init_weights()
+#    self.init_weights()
 
 
-  def init_weights(self):
-    for m in self.modules():
-      if isinstance(m, nn.Linear):
-        torch.nn.init.xavier_normal_(m.weight.data)
-        if m.bias is not None:
-          m.bias.data.fill_(0.)
+#  def init_weights(self):
+#    for m in self.modules():
+#      if isinstance(m, nn.Linear):
+#        torch.nn.init.xavier_normal_(m.weight.data)
+#        if m.bias is not None:
+#          m.bias.data.fill_(0.)
 
 
   def forward(self, h, x, v2ru):

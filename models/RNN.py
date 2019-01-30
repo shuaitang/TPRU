@@ -41,18 +41,18 @@ class TPRRNN(nn.Module):
 
       d_input = config.d_hidden * (2 if config.birnn  else 1)
 
-    self.init_weights()
+#    self.init_weights()
 
 
-  def init_weights(self):
-    for m in self.modules():
-      if isinstance(m, nn.ModuleList):
-        for l in m:
-          if isinstance(l, nn.Linear):
-            torch.nn.init.xavier_normal_(l.weight.data)
-            if l.bias is not None:
-              l.bias.data.fill_(0.)
-
+#  def init_weights(self):
+#    for m in self.modules():
+#      if isinstance(m, nn.ModuleList):
+#        for l in m:
+#          if isinstance(l, nn.Linear):
+#            torch.nn.init.xavier_normal_(l.weight.data)
+#            if l.bias is not None:
+#              l.bias.data.fill_(0.)
+#
 
 
   def forward_rnn(self, en, batch_sizes, x2fg, v2ru, h0=None):
@@ -60,9 +60,11 @@ class TPRRNN(nn.Module):
     bs = batch_sizes + [0]
     p = 0 
     q = bs[0] 
-    h0 = h0 if h0 is not None else torch.zeros(bs[0], self.config.d_hidden).cuda()
-    output = Variable(torch.zeros(sum(bs), self.config.d_hidden)).cuda()
-    hn = Variable(torch.zeros(bs[0], self.config.d_hidden)).cuda()
+    h0 = h0 if h0 is not None else torch.zeros(bs[0], self.config.d_hidden)
+    output = Variable(torch.zeros(sum(bs), self.config.d_hidden))
+    hn = Variable(torch.zeros(bs[0], self.config.d_hidden))
+
+    (h0, hn, output) = (h0.cuda(), hn.cuda(), output.cuda()) if self.config.cuda else (h0, hn, output)
 
     for i in range(len(bs) - 1):
       if i == 0:
@@ -86,9 +88,11 @@ class TPRRNN(nn.Module):
     bs = batch_sizes 
     q = np.sum(bs)
     p = q - bs[-1]
-    h0 = h0 if h0 is not None else torch.zeros(bs[0], self.config.d_hidden).cuda()
-    output = Variable(torch.zeros(sum(bs), self.config.d_hidden)).cuda()
-    hn = Variable(torch.zeros(bs[0], self.config.d_hidden)).cuda()
+    h0 = h0 if h0 is not None else torch.zeros(bs[0], self.config.d_hidden)
+    output = Variable(torch.zeros(sum(bs), self.config.d_hidden))
+    hn = Variable(torch.zeros(bs[0], self.config.d_hidden))
+ 
+    (h0, hn, output) = (h0.cuda(), hn.cuda(), output.cuda()) if self.config.cuda else (h0, hn, output)
 
     for i in range(len(bs)-1,-1,-1):
    
@@ -124,7 +128,8 @@ class TPRRNN(nn.Module):
       output = x.data
       batch_sizes = x.batch_sizes.cpu().detach().numpy().tolist()
 
-    hn = Variable(torch.zeros(stride, batch_sizes[0], self.config.d_hidden)).cuda()
+    hn = Variable(torch.zeros(stride, batch_sizes[0], self.config.d_hidden))
+    hn = hn.cuda() if self.config.cuda else hn
 
     for n in range(self.config.n_layers):
 

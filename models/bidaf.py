@@ -18,7 +18,6 @@ class model(nn.Module):
 
     self.embed = nn.Embedding(config.n_embed, config.d_embed, padding_idx=0)
     self.en = TPRRNN(self.config)
-    #    self.dropout = nn.Dropout(self.config.dp_ratio_semb) if config.dp_ratio_semb else lambda x: x
     self.clser = classifier(self.config) 
 
     att_config = config

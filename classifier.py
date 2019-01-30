@@ -18,7 +18,6 @@ class classifier(nn.Module):
       self.clser = nn.Sequential(
                    nn.Linear(d_z, inner_dim),    
                    nn.ReLU(True),
-                   nn.Dropout(config.dp_ratio),
                    nn.Linear(inner_dim, 1)
                  )
 
