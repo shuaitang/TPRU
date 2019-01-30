@@ -1,11 +1,8 @@
 # TPRU
-The implementation of our proposed TPRU with the code for experiments on Logical Entailment task
+The implementation of our proposed TPRU with the code for experiments on Logical Entailment task and Multi-genre Natural Language Inference. Both plain and BiDAF architectures are provided here.
 * [Learning Distributed Representations of Symbolic Structure Using Binding and Unbinding Operations](https://arxiv.org/pdf/1810.12456.pdf) - Shuai Tang, Paul Smolensky, Virginia R. de Sa
 The model and the results in the paper are currently out-dated and we plan to update the paper soon.
 
-# Introduction
-
-The repo contains the code of our proposed TPRU, which is a recurrent unit based on Tensor Product Representations, and the code for experiments on Logical Entailment task. Both plain architecture and BiDAF architecture are provided here. 
 
 ## Logical Entailment
 Here come the instructions on training our TPRU on Logical Entailment task.

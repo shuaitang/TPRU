@@ -1,7 +1,7 @@
 import torch 
 import torch.nn as nn
 import numpy as np
-from torch.autograd import Variable
+#from torch.autograd import Variable
 from torch.nn import functional as F
 from TPRU import TPRU
 
@@ -61,8 +61,8 @@ class TPRRNN(nn.Module):
     p = 0 
     q = bs[0] 
     h0 = h0 if h0 is not None else torch.zeros(bs[0], self.config.d_hidden)
-    output = Variable(torch.zeros(sum(bs), self.config.d_hidden))
-    hn = Variable(torch.zeros(bs[0], self.config.d_hidden))
+    output = torch.zeros(sum(bs), self.config.d_hidden)
+    hn = torch.zeros(bs[0], self.config.d_hidden)
 
     (h0, hn, output) = (h0.cuda(), hn.cuda(), output.cuda()) if self.config.cuda else (h0, hn, output)
 
@@ -89,8 +89,8 @@ class TPRRNN(nn.Module):
     q = np.sum(bs)
     p = q - bs[-1]
     h0 = h0 if h0 is not None else torch.zeros(bs[0], self.config.d_hidden)
-    output = Variable(torch.zeros(sum(bs), self.config.d_hidden))
-    hn = Variable(torch.zeros(bs[0], self.config.d_hidden))
+    output = torch.zeros(sum(bs), self.config.d_hidden)
+    hn = torch.zeros(bs[0], self.config.d_hidden)
  
     (h0, hn, output) = (h0.cuda(), hn.cuda(), output.cuda()) if self.config.cuda else (h0, hn, output)
 
@@ -128,7 +128,7 @@ class TPRRNN(nn.Module):
       output = x.data
       batch_sizes = x.batch_sizes.cpu().detach().numpy().tolist()
 
-    hn = Variable(torch.zeros(stride, batch_sizes[0], self.config.d_hidden))
+    hn = torch.zeros(stride, batch_sizes[0], self.config.d_hidden)
     hn = hn.cuda() if self.config.cuda else hn
 
     for n in range(self.config.n_layers):
