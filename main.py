@@ -85,7 +85,6 @@ def loss_function( pred, labels ):
 def save_model(model):
   info = "TPRU_logic_" + config.pooling + "dim{:03d}_roles{:03d}_bs{:03d}_".format(config.d_hidden, config.n_roles, config.batch_size)
   snapshot_prefix = os.path.join(config.save_path, info)
-  snapshot_prefix += "_".join([config.pooling, "{:.2}".format(config.dp_ratio)])
   torch.save(model, snapshot_prefix + "_best.pt")
 
 
