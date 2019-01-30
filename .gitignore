@@ -1,0 +1,6 @@
+*.pyc
+**/__pycache__/
+**/logical-entailment/logical-entailment-dataset/
+**/logical-entailment/preprocessed/
+*.json
+*.log
