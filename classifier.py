@@ -18,7 +18,7 @@ class classifier(nn.Module):
       self.clser = nn.Sequential(
                    nn.Linear(d_z, inner_dim),    
                    nn.ReLU(True),
-                   nn.Linear(inner_dim, 1)
+                   nn.Linear(inner_dim, 1 if config.n_classes == 2 else config.n_classes)
                  )
 
     self.init_weights()

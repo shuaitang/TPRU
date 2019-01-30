@@ -168,6 +168,7 @@ if __name__ == "__main__":
   parser.add_argument('--n_slices', type=int, default=1, help="number of slices in the dot-product operation")
   parser.add_argument('--n_roles', type=int, default=4, help="number of role vectors")
   parser.add_argument('--n_layers', type=int, default=1, help="number of recurrent layers")
+  parser.add_argument('--n_classes', type=int, default=2)
 
   parser.add_argument('--classifier', type=str, default="mlp", help="mlp (multilayer perceptron) or log_reg (logistic regression)")
   parser.add_argument('--pooling', type=str, default="max")
@@ -175,6 +176,8 @@ if __name__ == "__main__":
 
   parser.add_argument('--birnn', action='store_true', help="bidirectional RNN")
   parser.add_argument('--cuda', action='store_true', help="GPU training")
+  parser.add_argument('--elmo', action='store_true')
+  parser.add_argument('--finetune_elmo', action='store_true')
 
   parser.add_argument('--seq_length', type=int, default=40, help="the maximum length of the input sequences")
   parser.add_argument('--lr', type=float, default=5e-4, help="learning rate")
@@ -233,8 +236,6 @@ if __name__ == "__main__":
   best_train_acc = 0.
   best_dev_acc = 0.
   bestmodel = copy.deepcopy(model)
-
-  begin = time.time()
 
   for epoch in range(config.epochs):
     train_acc = train(epoch)

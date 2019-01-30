@@ -6,7 +6,7 @@ import numpy as np
 
 from RNN import TPRRNN
 from classifier import classifier
-
+from elmo import ELMoEmbedding
 
 
 class model(nn.Module):
@@ -16,7 +16,7 @@ class model(nn.Module):
     self.config = config
     self.hidden_size = config.d_hidden 
 
-    self.embed = nn.Embedding(config.n_embed, config.d_embed, padding_idx=0)
+    self.embed = ELMoEmbedding(config) if config.elmo else nn.Embedding(config.n_embed, config.d_embed, padding_idx=0)
     self.en = TPRRNN(self.config)
     self.clser = classifier(self.config) 
 
@@ -77,24 +77,34 @@ class model(nn.Module):
     return u_, v_ 
 
 
-  def forward(self, t_pre, t_hypo, l_pre, l_hypo):
+  def forward(self, t_pre, t_hypo, l_pre=None, l_hypo=None):
 
     # Encoding
-    wemb = self.embed(torch.cat([t_pre, t_hypo], dim=0))
-    lens = l_pre + l_hypo
+    if self.config.elmo:
+      tokens = t_pre + t_hypo
+      wemb, lens = self.embed(tokens)
+      lens = lens.cpu().numpy()
+    else:
+      wemb = self.embed(torch.cat([t_pre, t_hypo], dim=0))
+      lens = l_pre + l_hypo
 
-    u, v = self.encoding(self.en, wemb, lens).chunk(2,0)
-    u_w, v_w = wemb.chunk(2,0)
-
+    u, v = self.encoding(self.en, wemb[0] if self.config.elmo else wemb, lens).chunk(2,0)
     u_, v_ = self.attn(u, v)
-    U = torch.cat([u, v_, u_w], dim=2)
-    V = torch.cat([v, u_, v_w], dim=2)
 
+    U = torch.cat([u, v_], dim=2)
+    V = torch.cat([v, u_], dim=2)
     attn_input = torch.cat([U,V], dim=0)
-    pre, hypo = self.encoding(self.att, attn_input, lens).chunk(2,0)
 
-    z_pre  = self.rep_pooling(pre)
-    z_hypo = self.rep_pooling(hypo)
+    if self.config.elmo:
+      attn_input = torch.cat([attn_input, wemb[1]], dim=2)
+    else:
+      attn_input = torch.cat([attn_input, wemb], dim=2)
+
+    z = self.encoding(self.att, attn_input, lens)
+    
+    z = self.rep_pooling(z)
+    z_pre, z_hypo = z.chunk(2,0)
+
 
     # Classification
     pred = self.clser(z_pre, z_hypo)

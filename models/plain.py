@@ -6,7 +6,7 @@ from torch.nn import functional as F
 
 from RNN import TPRU, TPRRNN
 from classifier import classifier
-
+from elmo import ELMoEmbedding
 
 class model(nn.Module):
 
@@ -15,7 +15,7 @@ class model(nn.Module):
     self.config = config
     self.hidden_size = config.d_hidden 
 
-    self.embed = nn.Embedding(config.n_embed, config.d_embed, padding_idx=0)
+    self.embed = ELMoEmbedding(config) if config.elmo else nn.Embedding(config.n_embed, config.d_embed, padding_idx=0)
     self.en = TPRRNN(self.config)
     self.clser = classifier(self.config)    
 
@@ -64,11 +64,17 @@ class model(nn.Module):
     return z
 
 
-  def forward(self, t_pre, t_hypo, l_pre, l_hypo):
+  def forward(self, t_pre, t_hypo, l_pre=None, l_hypo=None):
 
     # Encoding
-    wemb = self.embed(torch.cat([t_pre, t_hypo], dim=0))
-    lens = l_pre + l_hypo
+    if self.config.elmo:
+      tokens = t_pre + t_hypo
+      wemb, lens = self.embed(tokens)
+      wemb = torch.cat([wemb[0], wemb[1]], dim=2)
+      lens = lens.cpu().numpy()
+    else:
+      wemb = self.embed(torch.cat([t_pre, t_hypo], dim=0))
+      lens = l_pre + l_hypo
 
     u, v = self.encoding(wemb, lens).chunk(2,0)
 

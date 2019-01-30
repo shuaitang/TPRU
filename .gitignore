@@ -6,3 +6,7 @@
 *.log
 *.pt
 *.sh
+*.hdf5
+*.jsonl
+*.tsv
+*.txt
