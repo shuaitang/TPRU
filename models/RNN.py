@@ -134,13 +134,13 @@ class TPRRNN(nn.Module):
     for n in range(self.config.n_layers):
 
       x2fg = self.f_x2fgs[n](output)
-      v2ru = self.f_v2ru[n](self.f_basis[n]).view(1, self.config.n_roles, self.config.n_heads, -1)
+      v2ru = self.f_v2ru[n](self.f_basis[n]).view(1, self.config.n_roles, self.config.n_slices, -1)
       f_output, f_hn = self.forward_rnn(self.f_cells[n], batch_sizes, x2fg, v2ru, h0[cnt] if h0 is not None else None)
       hn[cnt] = f_hn
       cnt += 1
       if self.config.birnn:
         x2fg = self.b_x2fgs[n](output)
-        v2ru = self.b_v2ru[n](self.b_basis[n]).view(1, self.config.n_roles, self.config.n_heads, -1)
+        v2ru = self.b_v2ru[n](self.b_basis[n]).view(1, self.config.n_roles, self.config.n_slices, -1)
         b_output, b_hn = self.backward_rnn(self.b_cells[n], batch_sizes, x2fg, v2ru, h0[cnt] if h0 is not None else None)
         hn[cnt] = b_hn
         cnt += 1

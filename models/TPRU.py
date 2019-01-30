@@ -35,8 +35,8 @@ class TPRU(nn.Module):
 
     vr, vu = v2ru.chunk(2,-1)
 
-    x2f = x2f.view(bs, 1, self.config.n_heads, -1)
-    h2f = h2f.view(bs, 1, self.config.n_heads, -1)
+    x2f = x2f.view(bs, 1, self.config.n_slices, -1)
+    h2f = h2f.view(bs, 1, self.config.n_slices, -1)
 
     ah, ax = (torch.cat([x2f, h2f], dim=0) * vu).sum(dim=3).chunk(2,0)
 

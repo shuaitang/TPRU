@@ -164,31 +164,27 @@ if __name__ == "__main__":
   parser.add_argument('--data_path', type=str,
                       default='data/logical-entailment/preprocessed/')
 
-  parser.add_argument('--d_embed', type=int, default=64)
-  parser.add_argument('--d_hidden', type=int, default=64)  
-  parser.add_argument('--n_heads', type=int, default=8)
-  parser.add_argument('--n_roles', type=int, default=4)
-  parser.add_argument('--n_layers', type=int, default=1)
+  parser.add_argument('--d_embed', type=int, default=64, help="dim of the embedding vectors")
+  parser.add_argument('--d_hidden', type=int, default=64, help="number of the hidden units")  
+  parser.add_argument('--n_slices', type=int, default=1, help="number of slices in the dot-product operation")
+  parser.add_argument('--n_roles', type=int, default=4, help="number of role vectors")
+  parser.add_argument('--n_layers', type=int, default=1, help="number of recurrent layers")
 
-  parser.add_argument('--classifier', type=str, default="mlp")
+  parser.add_argument('--classifier', type=str, default="mlp", help="mlp (multilayer perceptron) or log_reg (logistic regression)")
   parser.add_argument('--pooling', type=str, default="max")
-  parser.add_argument('--model_type', type=str, default="plain") 
+  parser.add_argument('--model_type', type=str, default="plain", help="plain or bidaf") 
 
+  parser.add_argument('--birnn', action='store_true', help="bidirectional RNN")
+  parser.add_argument('--cuda', action='store_true', help="GPU training")
 
-  parser.add_argument('--dp_ratio_rnn', type=float, default=0.00)
-  parser.add_argument('--dp_ratio', type=float, default=0.00)
-  parser.add_argument('--dp_ratio_semb', type=float, default=0.00)
-  parser.add_argument('--birnn', action='store_true')
-  parser.add_argument('--cuda', action='store_true')
-  parser.add_argument('--tie_weights', action='store_true')
-  parser.add_argument('--seq_length', type=int, default=40)
-  parser.add_argument('--lr', type=float, default=5e-4)
-  parser.add_argument('--min_lr', type=float, default=1e-6)
+  parser.add_argument('--seq_length', type=int, default=40, help="the maximum length of the input sequences")
+  parser.add_argument('--lr', type=float, default=5e-4, help="learning rate")
+
   parser.add_argument('--clip', type=float, default=10.)
   parser.add_argument('--batch_size', type=int, default=64)
   parser.add_argument('--save_every', type=int, default=20000)
   parser.add_argument('--epochs', type=int, default=10)
-  parser.add_argument('--beta', type=float, default=0.0)
+
   config = parser.parse_args()
   
   
