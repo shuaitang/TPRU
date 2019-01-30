@@ -5,7 +5,6 @@
 *.json
 *.log
 *.pt
-*.sh
 *.hdf5
 *.jsonl
 *.tsv
