@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 import glob
 
@@ -18,6 +19,8 @@ from torch.optim import Adam
 
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark=False
+
+sys.path.insert(0, 'models/')
 
 import plain
 import bidaf
