@@ -20,7 +20,7 @@ sh download.sh
 
 ### Training
 ```
-CUDA_VISIBLE_DEVICES=0 python -u main_logical.py --birnn --cuda 
+CUDA_VISIBLE_DEVICES=0 python -u main_logical.py --birnn --cuda \
  --lr 1e-3 --epochs 90 \
  --batch_size 64 \
  --d_hidden 64 \
@@ -33,14 +33,28 @@ CUDA_VISIBLE_DEVICES=0 python -u main_logical.py --birnn --cuda
 The code for training our TPRU on MNLI is provided here.
 
 ### Data preparation
-We recommend to learn models with ELMo embeddings.
+We recommend to learn models with ELMo embeddings, and here is a piece of code to download ELMo files.
+```
+cd data/elmo/
+sh download.sh
+```
+Data preprocessing is carried out as follows:
 ```
 cd data/mnli/
-sh 
+sh preprocessing.sh 
 ```
 
-### Training
 
+### Training
+```
+CUDA_VISIBLE_DEVICES=0 python -u main_mnli.py --birnn --cuda --elmo \
+ --lr 1e-4 --epochs 15 \
+ --batch_size 64 \
+ --d_hidden 512 \
+ --n_layers 1 \
+ --model_type plain \
+ --n_roles 1024 2>&1 | tee training.log
+```
 
 
 ## Contact
