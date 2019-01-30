@@ -4,3 +4,4 @@
 **/logical-entailment/preprocessed/
 *.json
 *.log
+*.pt
