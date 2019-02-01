@@ -1,8 +1,7 @@
 # TPRU
-The implementation of our proposed TPRU with the code for experiments on Logical Entailment task and Multi-genre Natural Language Inference. Both plain and BiDAF architectures are provided here.
+The implementation of our proposed TPRU with the code for experiments on Logical Entailment task, Multi-genre Natural Language Inference and Language Modelling. Both plain and BiDAF architectures are provided here.
 * [Learning Distributed Representations of Symbolic Structure Using Binding and Unbinding Operations](https://arxiv.org/pdf/1810.12456.pdf) - Shuai Tang, Paul Smolensky, Virginia R. de Sa
 
-(The model and the results in the paper are currently out-dated and we plan to update the paper soon.)
 
 
 ## Logical Entailment
@@ -24,7 +23,7 @@ CUDA_VISIBLE_DEVICES=0 python -u main_logical.py --birnn --cuda \
  --d_hidden 64 \
  --n_layers 1 \
  --model_type plain \
- --n_roles 256 2>&1 | tee training.log 
+ --n_roles 256 2>&1 | tee training_logical.log 
 ```
 
 ## Multi-genre Natural Language Inference
@@ -51,7 +50,35 @@ CUDA_VISIBLE_DEVICES=0 python -u main_mnli.py --birnn --cuda --elmo \
  --d_hidden 512 \
  --n_layers 1 \
  --model_type plain \
- --n_roles 1024 2>&1 | tee training.log
+ --n_roles 1024 2>&1 | tee training_mnli.log
+```
+
+
+## Language Modelling on WikiText-103
+
+The code here conducts data preprocessing and training a language modelling with our proposed TPRU on WikiText-103.
+
+
+### Data preparation
+The wikitext-103 is encoded by Byte Pair Encoding method. The encoded corpus is saved as a HDF5 file.
+
+```
+cd data/wikitext-103
+sh 1_download.sh
+sh 2_processing.sh
+python 3_conversion.py
+```
+
+
+### Training
+
+```
+CUDA_VISIBLE_DEVICES=0 python -u main_lm.py -cuda \
+--batch_size 32 \
+--seq_length 128 \
+--d_hidden 1024 \
+--n_roles 1024 \
+--n_layers 2 2>&1 | tee training_lm.log
 ```
 
 
