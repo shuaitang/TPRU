@@ -65,7 +65,7 @@ The wikitext-103 is encoded by Byte Pair Encoding method. The encoded corpus is 
 ```
 cd data/wikitext-103
 sh 1_download.sh
-sh 2_processing.sh
+sh 2_processing.sh 100000
 python 3_conversion.py
 ```
 
