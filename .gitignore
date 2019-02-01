@@ -9,3 +9,6 @@
 *.jsonl
 *.tsv
 *.txt
+*.tokens
+*.vocab
+*.h5

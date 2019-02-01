@@ -122,8 +122,9 @@ class TPRRNN(nn.Module):
     stride = self.config.n_layers * (2 if self.config.birnn else 1)
   
     if type(x) is torch.Tensor:
-      output = x
       batch_sizes = [x.size(1)] * self.config.seq_length
+      seqlen, bs, d_hidden = x.size()
+      output = x.contiguous().view(-1, d_hidden)
     else:
       output = x.data
       batch_sizes = x.batch_sizes.cpu().detach().numpy().tolist()
@@ -149,7 +150,10 @@ class TPRRNN(nn.Module):
       else:
         output = f_output
 
-    output = torch.nn.utils.rnn.PackedSequence(output, x.batch_sizes)
+    if type(x) is torch.Tensor:
+      output = output.view(seqlen, bs, d_hidden)
+    else:
+      output = torch.nn.utils.rnn.PackedSequence(output, x.batch_sizes)
 
     return output, hn
 
