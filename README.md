@@ -56,7 +56,7 @@ CUDA_VISIBLE_DEVICES=0 python -u main_mnli.py --birnn --cuda --elmo \
 
 ## Language Modelling on WikiText-103
 
-The code here conducts data preprocessing and training a language modelling with our proposed TPRU on WikiText-103.
+The code here conducts data preprocessing and training a language modelling with our proposed TPRU on WikiText-103. It supports multi-GPU training.
 
 
 ### Data preparation
