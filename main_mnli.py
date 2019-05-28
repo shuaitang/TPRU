@@ -157,7 +157,6 @@ if __name__ == "__main__":
 
   parser.add_argument('--bidirectional', action='store_true')
   parser.add_argument('--cuda', action='store_true')
-  parser.add_argument('--lasth', action='store_true')
 
   parser.add_argument('--seq_length', type=int, default=40)
   parser.add_argument('--lr', type=float, default=5e-4)

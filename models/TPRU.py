@@ -1,8 +1,6 @@
 import torch
 import torch.nn as nn
-#from torch.jit import Tensor
 
-#import torch.jit as jit
 from torch import Tensor
 from typing import List, Tuple
 

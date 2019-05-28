@@ -12,3 +12,4 @@
 *.tokens
 *.vocab
 *.h5
+*.bpe
