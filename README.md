@@ -1,8 +1,12 @@
 # TPRU
 The implementation of our proposed TPRU with the code for experiments on Logical Entailment task, Multi-genre Natural Language Inference and Language Modelling. Both plain and BiDAF architectures are provided here.
-* [Learning Distributed Representations of Symbolic Structure Using Binding and Unbinding Operations](https://arxiv.org/pdf/1810.12456.pdf) - Shuai Tang, Paul Smolensky, Virginia R. de Sa
+* [Learning Distributed Representations of Symbolic Structure Using Binding and Unbinding Operations](https://arxiv.org/pdf/1810.12456v5.pdf) - Shuai Tang, Paul Smolensky, Virginia R. de Sa
 
-
+## Requirements
+```
+pytorch >= 1.0
+python >= 3.5
+```
 
 ## Logical Entailment
 Here come the instructions on training our TPRU on Logical Entailment task.
@@ -17,7 +21,7 @@ sh download.sh
 
 ### Training
 ```
-CUDA_VISIBLE_DEVICES=0 python -u main_logical.py --birnn --cuda \
+CUDA_VISIBLE_DEVICES=0 python -u main_logical.py --bidirectional --cuda \
  --lr 1e-3 --epochs 90 \
  --batch_size 64 \
  --d_hidden 64 \
@@ -44,7 +48,7 @@ sh preprocessing.sh
 
 ### Training
 ```
-CUDA_VISIBLE_DEVICES=0 python -u main_mnli.py --birnn --cuda --elmo \
+CUDA_VISIBLE_DEVICES=0 python -u main_mnli.py --bidirectional --cuda --elmo \
  --lr 1e-4 --epochs 15 \
  --batch_size 64 \
  --d_hidden 512 \
@@ -73,7 +77,7 @@ python 3_conversion.py
 ### Training
 
 ```
-CUDA_VISIBLE_DEVICES=0 python -u main_lm.py -cuda \
+CUDA_VISIBLE_DEVICES=0 python -u main_lm.py --cuda \
 --batch_size 32 \
 --seq_length 128 \
 --d_hidden 1024 \
