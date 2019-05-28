@@ -45,7 +45,13 @@ class model(nn.Module):
     inputs = inputs.transpose(0,1)
     masks = masks.transpose(0,1).unsqueeze(2)
     #x: LxNxC
-    outputs = self.en(inputs, masks, h0)
+
+    with torch.no_grad():
+      shifted_masks = torch.zeros_like(masks)
+      shifted_masks[:-1] = masks[1:]
+      indices = (masks - shifted_masks).unsqueeze(0).byte()
+ 
+    outputs, _ = self.en(inputs, masks, indices, h0)
     outputs = outputs.transpose(0,1)
 
     z = self.rep_pooling(outputs)
@@ -65,7 +71,7 @@ class model(nn.Module):
     else:
       wemb = self.embed(torch.cat([t_pre, t_hypo], dim=0))
       masks = torch.cat([mask_pre, mask_hypo], dim=0)
-      
+     
     u, v = self.encoding(wemb, masks, self.h0).chunk(2,0)
 
     # Classification

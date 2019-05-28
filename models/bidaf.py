@@ -56,7 +56,12 @@ class model(nn.Module):
     inputs = inputs.transpose(0,1)
     masks = masks.transpose(0,1).unsqueeze(2)
     #x: LxNxC
-    outputs = en(inputs, masks, h0)
+    with torch.no_grad():
+      shifted_masks = torch.zeros_like(masks)
+      shifted_masks[:-1] = masks[1:]
+      indices = (masks - shifted_masks).unsqueeze(0).byte()
+
+    outputs, _ = en(inputs, masks, indices, h0)
     outputs = outputs.transpose(0,1) #NxLxC
 
     return outputs

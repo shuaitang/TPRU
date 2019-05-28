@@ -10,7 +10,7 @@ from TPRU import TPRU
 class TPRULayer(torch.jit.ScriptModule):
 #class TPRULayer(torch.nn.Module):
 
-  __constants__ = ['n_layers', 'bidirectional', 'layers']
+  __constants__ = ['n_layers', 'bidirectional', 'layers', 'lasth']
   def __init__(self, config):
     super(TPRULayer, self).__init__()
 
@@ -26,10 +26,11 @@ class TPRULayer(torch.jit.ScriptModule):
     self.n_layers = config.n_layers
     self.bidirectional = config.bidirectional
     self.layers = nn.ModuleList(lst)
+    self.lasth = config.lasth
 
   
   @torch.jit.script_method
-  def forward(self, padded, masks, state):
+  def forward(self, padded, masks, indices, state):
     hn = torch.jit.annotate(List[Tensor], [])    
     bsize = padded.size(1)
     ind_vecs = 0
@@ -51,5 +52,11 @@ class TPRULayer(torch.jit.ScriptModule):
         outputs += out
         padded = outputs[-1]
         ind_vecs += 1
-    return padded
+
+    lasth = torch.masked_select(torch.stack(outputs), indices.byte().unsqueeze(0)).view(self.n_layers * (2 if self.bidirectional else 1), bsize, -1)
+      
+    return padded, lasth
+
+
+
 

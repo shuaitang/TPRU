@@ -179,6 +179,7 @@ if __name__ == "__main__":
   parser.add_argument('--cuda', action='store_true', help="GPU training")
   parser.add_argument('--elmo', action='store_true')
   parser.add_argument('--finetune_elmo', action='store_true')
+  parser.add_argument('--lasth', action='store_true')
 
   parser.add_argument('--seq_length', type=int, default=40, help="the maximum length of the input sequences")
   parser.add_argument('--lr', type=float, default=5e-4, help="learning rate")
