@@ -16,7 +16,6 @@ class model(nn.Module):
     self.hidden_size = config.d_hidden 
 
     self.embed = ELMoEmbedding(config) if config.elmo else nn.Embedding(config.n_embed, config.d_embed, padding_idx=0)
-    config.n_layers = 2
     self.en = TPRULayer(config)
     self.clser = classifier(self.config)    
     self.h0 = nn.Parameter(torch.zeros(config.n_layers * (2 if config.bidirectional else 1), 1, config.d_hidden))

@@ -23,7 +23,7 @@ torch.backends.cudnn.benchmark=False
 sys.path.insert(0, 'models/')
 
 import plain
-#import bidaf
+import bidaf
 
 ## data augmentation based on alpha-equivalence
 def augmentation(sent, randint):

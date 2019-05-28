@@ -4,7 +4,7 @@ from torch.nn import functional as F
 
 import numpy as np
 
-from RNN import TPRRNN
+from TPRN import TPRULayer
 from classifier import classifier
 from elmo import ELMoEmbedding
 
@@ -17,12 +17,19 @@ class model(nn.Module):
     self.hidden_size = config.d_hidden 
 
     self.embed = ELMoEmbedding(config) if config.elmo else nn.Embedding(config.n_embed, config.d_embed, padding_idx=0)
-    self.en = TPRRNN(self.config)
-    self.clser = classifier(self.config) 
+    self.en = TPRULayer(config)
+    self.clser = classifier(config) 
+    self.en_h0 = nn.Parameter(torch.zeros(config.n_layers * (2 if config.bidirectional else 1), 1, config.d_hidden))
+    self.en_h0.requires_grad = False
+
 
     att_config = config
-    att_config.d_embed = config.d_embed + config.d_hidden * 4
-    self.att = TPRRNN(self.config)
+    att_config.d_embed = config.d_embed + config.d_hidden * 2 * (2 if config.bidirectional else 1)
+    att_config.n_layers = config.att_layers
+    self.att = TPRULayer(att_config)
+    self.att_h0 = nn.Parameter(torch.zeros(config.att_layers * (2 if config.bidirectional else 1), 1, config.d_hidden))
+    self.att_h0.requires_grad = False
+
 
 
   def init_weights(self):
@@ -43,28 +50,16 @@ class model(nn.Module):
       return lasth
 
 
-  def encoding(self, en, inputs, lens):
-
-    #inputs: NxLxC
-    sorted_indices = np.argsort(lens)[::-1].tolist()
-    lens = np.array(lens)[sorted_indices]
-    wemb = inputs[sorted_indices]
+  def encoding(self, en, inputs, masks, h0):
 
     #x: NxLxC
-    x = wemb.transpose(0,1)
+    inputs = inputs.transpose(0,1)
+    masks = masks.transpose(0,1).unsqueeze(2)
     #x: LxNxC
-    bsize = x.size()[1]
-    embs = torch.nn.utils.rnn.pack_padded_sequence(x, lens)
-    output, hn = en(embs)
+    outputs = en(inputs, masks, h0)
+    outputs = outputs.transpose(0,1) #NxLxC
 
-    seqs, lens = torch.nn.utils.rnn.pad_packed_sequence(output)
-    lens = torch.from_numpy(np.asarray(lens).reshape(bsize,1)).float().cuda()
-    seqs = seqs.transpose(0,1) #NxLxC
-
-    unsorted_indices = np.argsort(sorted_indices).tolist()
-    seqs = seqs[unsorted_indices]
-
-    return seqs
+    return outputs
 
 
   def attn(self, u, v):
@@ -77,34 +72,27 @@ class model(nn.Module):
     return u_, v_ 
 
 
-  def forward(self, t_pre, t_hypo, l_pre=None, l_hypo=None):
+  def forward(self, t_pre, t_hypo, mask_pre=None, mask_hypo=None):
 
     # Encoding
     if self.config.elmo:
       tokens = t_pre + t_hypo
-      wemb, lens = self.embed(tokens)
-      lens = lens.cpu().numpy()
+      wemb, masks = self.embed(tokens)
     else:
       wemb = self.embed(torch.cat([t_pre, t_hypo], dim=0))
-      lens = l_pre + l_hypo
+      masks = torch.cat([mask_pre, mask_hypo], dim=0)
 
-    u, v = self.encoding(self.en, wemb[0] if self.config.elmo else wemb, lens).chunk(2,0)
+    u, v = self.encoding(self.en, wemb[0] if self.config.elmo else wemb, masks, self.en_h0).chunk(2,0)
     u_, v_ = self.attn(u, v)
 
     U = torch.cat([u, v_], dim=2)
     V = torch.cat([v, u_], dim=2)
     attn_input = torch.cat([U,V], dim=0)
+    attn_input = torch.cat([attn_input, wemb[1] if self.config.elmo else wemb], dim=2)
 
-    if self.config.elmo:
-      attn_input = torch.cat([attn_input, wemb[1]], dim=2)
-    else:
-      attn_input = torch.cat([attn_input, wemb], dim=2)
-
-    z = self.encoding(self.att, attn_input, lens)
-    
+    z = self.encoding(self.att, attn_input, masks, self.att_h0)
     z = self.rep_pooling(z)
     z_pre, z_hypo = z.chunk(2,0)
-
 
     # Classification
     pred = self.clser(z_pre, z_hypo)
