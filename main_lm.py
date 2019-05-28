@@ -146,7 +146,7 @@ if __name__ == "__main__":
   parser.add_argument('--n_layers', type=int, default=2)
   parser.add_argument('--n_slices', type=int, default=8)
   
-  parser.add_argument('--birnn', action='store_true')
+  parser.add_argument('--bidirectional', action='store_true')
   parser.add_argument('--cuda', action='store_true')
   parser.add_argument('--tie_weights', action='store_true')
   

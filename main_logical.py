@@ -23,7 +23,7 @@ torch.backends.cudnn.benchmark=False
 sys.path.insert(0, 'models/')
 
 import plain
-import bidaf
+#import bidaf
 
 ## data augmentation based on alpha-equivalence
 def augmentation(sent, randint):
@@ -59,12 +59,10 @@ def get_batch(i, split='train'):
     for j in range(l):
       a[j] = b[j]
 
-
   if split == "train":
     randint = np.random.randint(0,26,size=26)
     pre = augmentation(pre, randint)
     hypo = augmentation(hypo, randint)
-
 
   if not config.cuda:
     print("Not Working")
@@ -72,8 +70,10 @@ def get_batch(i, split='train'):
   else:
     labels = T(np.array(labels)).float().cuda()
     pre, hypo = T(pre).long().cuda(), T(hypo).long().cuda()
+    mask_pre = (pre > 0).long()
+    mask_hypo = (hypo > 0).long()
 
-  return pre, hypo, l_pre, l_hypo, labels
+  return pre, hypo, mask_pre, mask_hypo, labels
 
 
 ## classification loss
@@ -98,8 +98,8 @@ def evaluate(cmodel, split):
   
   with torch.no_grad():
     for i in range(iters):
-      t_pre, t_hypo, l_len, l_hypo, labels = get_batch(i, split)
-      pred = cmodel(t_pre, t_hypo, l_len, l_hypo).view(-1)
+      t_pre, t_hypo, mask_pre, mask_hypo, labels = get_batch(i, split)
+      pred = cmodel(t_pre, t_hypo, mask_pre, mask_hypo).view(-1)
       pred_labels = F.relu(torch.sign(pred))
       num_correct += torch.sum(pred_labels == labels).data.item()
   return pred_labels, num_correct * 100. / cnt[split]
@@ -125,10 +125,10 @@ def train(epoch):
   for i in range(iters):
 
     begin = time.time()
-    t_pre, t_hypo, l_pre, l_hypo, labels = get_batch(i, 'train')
+    t_pre, t_hypo, mask_pre, mask_hypo, labels = get_batch(i, 'train')
     d_time += time.time() - begin    
 
-    pred = model(t_pre, t_hypo, l_pre, l_hypo).view(-1)
+    pred = model(t_pre, t_hypo, mask_pre, mask_hypo).view(-1)
     loss = loss_function(pred, labels)
    
     opt.zero_grad()
@@ -167,14 +167,15 @@ if __name__ == "__main__":
   parser.add_argument('--d_hidden', type=int, default=64, help="number of the hidden units")  
   parser.add_argument('--n_slices', type=int, default=1, help="number of slices in the dot-product operation")
   parser.add_argument('--n_roles', type=int, default=4, help="number of role vectors")
-  parser.add_argument('--n_layers', type=int, default=1, help="number of recurrent layers")
+  parser.add_argument('--n_layers', type=int, default=2, help="number of encoding layers")
+  parser.add_argument('--att_layers', type=int, default=1, help="number of attention layers")
   parser.add_argument('--n_classes', type=int, default=2)
 
   parser.add_argument('--classifier', type=str, default="mlp", help="mlp (multilayer perceptron) or log_reg (logistic regression)")
   parser.add_argument('--pooling', type=str, default="max")
   parser.add_argument('--model_type', type=str, default="plain", help="plain or bidaf") 
 
-  parser.add_argument('--birnn', action='store_true', help="bidirectional RNN")
+  parser.add_argument('--bidirectional', action='store_true', help="bidirectional RNN")
   parser.add_argument('--cuda', action='store_true', help="GPU training")
   parser.add_argument('--elmo', action='store_true')
   parser.add_argument('--finetune_elmo', action='store_true')
@@ -235,7 +236,8 @@ if __name__ == "__main__":
 
   best_train_acc = 0.
   best_dev_acc = 0.
-  bestmodel = copy.deepcopy(model)
+#  bestmodel = copy.deepcopy(model)
+#  bestmodel = model.clone().detach()
 
   for epoch in range(config.epochs):
     train_acc = train(epoch)
@@ -247,10 +249,11 @@ if __name__ == "__main__":
       best_train_acc = train_acc
       for split in test_splits:
         print(split + " : {:2.2f}".format(evaluate(model, split)[1]))
-      bestmodel = copy.deepcopy(model)      
-      save_model(bestmodel)
+
+#      bestmodel = copy.deepcopy(model)      
+#      save_model(bestmodel)
  
   print("Best train acc: {:2.2f}, Best dev acc: {:2.2f}".format(best_train_acc, best_dev_acc))
-  for split in test_splits:
-    print(split + " : {:2.2f}".format(evaluate(bestmodel, split)[1]))
+#  for split in test_splits:
+#    print(split + " : {:2.2f}".format(evaluate(bestmodel, split)[1]))
 

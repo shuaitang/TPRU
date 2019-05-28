@@ -1,53 +1,54 @@
 import torch
 import torch.nn as nn
-from torch.nn import functional as F
+#from torch.jit import Tensor
 
-class TPRU(nn.Module):
+#import torch.jit as jit
+from torch import Tensor
+from typing import List, Tuple
 
-  def __init__(self, config, d_input):
+
+class TPRU(torch.jit.ScriptModule):
+
+
+  def __init__(self, config):
     super(TPRU, self).__init__()
-    self.config = config
 
+    self.basis = nn.Parameter(torch.randn(config.n_roles, config.d_hidden))
+    self.basis.requires_grad = False
+
+    self.v2ru = nn.Linear(config.d_hidden, config.d_hidden * 2)
     self.h2fg = nn.Linear(config.d_hidden, config.d_hidden * 2)
+    self.x2fg = nn.Linear(config.d_input,  config.d_hidden * 2)
 
-    self.bh = nn.Parameter(torch.ones(1).float())
-    self.bx = nn.Parameter(torch.ones(1).float())
-    self.bg = nn.Parameter(torch.ones(1).float())     
+    self.bias_h = nn.Parameter(torch.ones(1))
+    self.bias_x = nn.Parameter(torch.ones(1))
 
-#    self.init_weights()
+  @torch.jit.script_method
+  def forward(self, inputs, masks, state):   
+    h = state 
+   
+    x2f, x2g = self.x2fg(inputs).chunk(2, -1)
+    v2r, v2u = self.v2ru(self.basis).chunk(2, -1)
 
+    v2u = v2u.transpose(1,0)
 
-#  def init_weights(self):
-#    for m in self.modules():
-#      if isinstance(m, nn.Linear):
-#        torch.nn.init.xavier_normal_(m.weight.data)
-#        if m.bias is not None:
-#          m.bias.data.fill_(0.)
+    seql, bsize, dim = x2f.size()
 
+    fxt = torch.relu(x2f.view(-1, dim).mm(v2u) + self.bias_x).view(seql, bsize, -1)
 
-  def forward(self, h, x, v2ru):
+    outputs = torch.jit.annotate(List[Tensor], [])
 
-    h = h.clone()
-    bs, d_h = h.size()
+    for i in range(inputs.size(0)):
+      h2f, h2g = self.h2fg(h).chunk(2, -1)
+      fbt = torch.relu(h2f.mm(v2u) + self.bias_h)
+      fxb = (fxt[i] + fbt).pow(2.0)
+      ft = fxb / fxb.sum(dim=1, keepdim=True).clamp_min(1e-7)
+      h_ = ft.mm(v2r)
 
-    x2f, x2g = x.chunk(2,1)
-    h2f, h2g = self.h2fg(h).chunk(2,1)
-
-    vr, vu = v2ru.chunk(2,-1)
-
-    x2f = x2f.view(bs, 1, self.config.n_slices, -1)
-    h2f = h2f.view(bs, 1, self.config.n_slices, -1)
-
-    ah, ax = (torch.cat([x2f, h2f], dim=0) * vu).sum(dim=3).chunk(2,0)
-
-    ah = torch.relu(ah + self.bh)
-    ax = torch.relu(ax + self.bx)
-
-    a = F.normalize((ah + ax).pow(2.), p=1., dim=1)
-
-    hh = (a.unsqueeze(3) * vr).sum(dim=1).view(bs, -1)
-          
-    g = torch.sigmoid(x2g + h2g + self.bg)
-    h_ = g * hh + (1-g) * h
-
-    return h_
+      gt = torch.sigmoid(x2g[i] + h2g)
+      h = gt * h_ + (1. - gt) * h
+      h = h * masks[i]
+      
+      outputs += [h]      
+    
+    return torch.stack(outputs)

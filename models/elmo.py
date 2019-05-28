@@ -21,6 +21,6 @@ class ELMoEmbedding(nn.Module):
   def forward(self, sentences):
     char_ids = self.T(batch_to_ids(sentences))
     embeddings = self.elmo(char_ids)
-    lens = embeddings['mask'].sum(1)
+#    lens = embeddings['mask'].sum(1)
 
-    return embeddings['elmo_representations'], lens
+    return embeddings['elmo_representations'], embeddings['mask']

@@ -15,7 +15,7 @@ class model(nn.Module):
 
     self.embed = nn.Embedding(config.n_embed, config.d_embed, padding_idx=0)
     self.en = TPRRNN(config)
-    self.proj = nn.Linear(config.d_hidden * (2 if config.birnn else 1), config.d_embed)
+    self.proj = nn.Linear(config.d_hidden * (2 if config.bidirectional else 1), config.d_embed)
     self.out = nn.Linear(config.d_embed, config.n_embed)
 
     if config.tie_weights:

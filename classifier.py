@@ -8,7 +8,7 @@ class classifier(nn.Module):
     super(classifier, self).__init__()
     self.config = config
 
-    d_z = config.d_hidden * (2 if config.birnn else 1) * 4
+    d_z = config.d_hidden * (2 if config.bidirectional else 1) * 4
 
     inner_dim = config.d_hidden
 
