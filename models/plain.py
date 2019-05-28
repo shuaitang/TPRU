@@ -39,13 +39,13 @@ class model(nn.Module):
       return lasth
 
 
-  def encoding(self, inputs, masks, h0= None):
+  def encoding(self, inputs, masks, h0):
 
     #inputs: NxLxC
     inputs = inputs.transpose(0,1)
     masks = masks.transpose(0,1).unsqueeze(2)
     #x: LxNxC
-    outputs = self.en(inputs, masks, h0 if h0 is not None else self.h0)
+    outputs = self.en(inputs, masks, h0)
     outputs = outputs.transpose(0,1)
 
     z = self.rep_pooling(outputs)
@@ -66,7 +66,7 @@ class model(nn.Module):
       wemb = self.embed(torch.cat([t_pre, t_hypo], dim=0))
       masks = torch.cat([mask_pre, mask_hypo], dim=0)
       
-    u, v = self.encoding(wemb, masks).chunk(2,0)
+    u, v = self.encoding(wemb, masks, self.h0).chunk(2,0)
 
     # Classification
     pred = self.clser(u, v)

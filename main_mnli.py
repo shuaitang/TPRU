@@ -152,7 +152,8 @@ if __name__ == "__main__":
   parser.add_argument('--pooling', type=str, default="max")
   
 
-  parser.add_argument('--n_layers', type=int, default=1)
+  parser.add_argument('--n_layers', type=int, default=2)
+  parser.add_argument('--att_layers', type=int, default=1)
   parser.add_argument('--bidirectional', action='store_true')
 
   parser.add_argument('--cuda', action='store_true')
@@ -218,7 +219,7 @@ if __name__ == "__main__":
   best_dev_mismatched_acc = 0.
   best_avg_acc = 0.
   dev_avg_acc = 0.
-  bestmodel = copy.deepcopy(model)
+#  bestmodel = copy.deepcopy(model)
 
   for epoch in range(config.epochs):
     train_acc = train(epoch)
@@ -232,8 +233,8 @@ if __name__ == "__main__":
       best_train_acc = train_acc
       best_dev_matched_acc = dev_matched_acc
       best_dev_mismatched_acc = dev_mismatched_acc
-      bestmodel = copy.deepcopy(model)
-      save_model(bestmodel)
+#      bestmodel = copy.deepcopy(model)
+#      save_model(bestmodel)
  
     print("Best train acc: {:2.2f}, Best dev matched acc: {:2.2f}, Best dev mismatched acc: {:2.2f}".format(best_train_acc, best_dev_matched_acc, best_dev_mismatched_acc))
   
