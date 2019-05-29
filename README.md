@@ -1,6 +1,7 @@
 # TPRU
 The implementation of our proposed TPRU with the code for experiments on Logical Entailment task, Multi-genre Natural Language Inference and Language Modelling. Both plain and BiDAF architectures are provided here.
-* [Learning Distributed Representations of Symbolic Structure Using Binding and Unbinding Operations](https://arxiv.org/pdf/1810.12456v5.pdf) - Shuai Tang, Paul Smolensky, Virginia R. de Sa
+* [Learning Distributed Representations of Symbolic Structure Using Binding and Unbinding Operations](https://arxiv.org/pdf/1810.12456v5.pdf) 
+ - Shuai Tang, Paul Smolensky, Virginia R. de Sa
 
 ## Requirements
 ```
